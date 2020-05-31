@@ -55,38 +55,64 @@ char b[] = "/home/peer/Desktop/deletefolder";
 sleep(2);
 int ret = rename(path,b);
 if(ret==0){
-printf("Files succesfully moved \n");}	
-else{perror("Error \n");}
+	printf("Files succesfully moved \n");
+	}	
+	else{
+		perror("Error \n");
+	}
 remove(path);
 }
 
-void deletedata(char *path){
+void deletedata(char *dpath){
+int i=0;
 char str1[10];
-printf("Delete directory?");
-fgets(str1,10,stdin);
-if(str1 == "y"){
-printf("Yes");}
-else {printf("No");}
+printf("Delete directory? \n");
+fgets(str1,3,stdin);
+char aName[]="yes";
+if(strcmp(str1,aName)){
+	system("rm file-*.txt");
+	rmdir(dpath);}
+	else {
+		perror("Error in comparison \n");
+	}
 }
 
 
 
 
 int main(){
+
 char newfolder[]="newfolder";
+char deletefolder[]="deletefolder";
 char path[]="/home/peer/Desktop/newfolder";
 int value = 100;
 char deletepath[]="/home/peer/Desktop/deletefolder";
+pid_t pid = fork();
 
 
 createfolder(newfolder);
+createfolder(deletefolder);
 movefolder(path);
-createdata(path,value);
+
+printf("Dateien verdoppeln?");
+char str[10];
+char aName[]="yes";
+fgets(str,3,stdin);
+if(strcmp(str,aName)){
+	// fork um Dateien doppelt zu erstellen
+	fork();
+	value=200;
+	createdata(path,value);
+	printf("Fork ID ist %d \n",getpid());
+	exit(0);
+	}
+	else {
+	createdata(path,value);
+}
+
+sleep(2);
 movedata(path);
 deletedata(deletepath);
-
-
-
 
 return(0);
 }
