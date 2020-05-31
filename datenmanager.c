@@ -19,9 +19,7 @@ if(stat(filename, &st) == -1){
 }
 
 
-void movefolder(char *path){
-
-char oldname[]= "/home/peer/Desktop/C/newfolder";
+void movefolder(char *path, char *oldname){
 int ret = rename(oldname, path);
 }
 
@@ -33,14 +31,14 @@ ret= chdir(path);
 int i =0;
 char fname[value];
 
-// definiere pointer für File
+// define pointer for file
 FILE * filePointer= NULL;
-//definiere file und erstelle n files und schreibe text rein
+//define file, create and write text
 	for(i;i<value;i++){
 		sprintf(fname,"file-%d.txt",i);
 		filePointer =fopen(fname,"w");
 		fputs("This is a text",filePointer);
-	//prüfe file
+	//check file
 		if(filePointer==NULL){
 			printf("Error in Creating a file \n");
 			exit(EXIT_FAILURE);
@@ -52,13 +50,12 @@ FILE * filePointer= NULL;
 void movedata(char *path){
 
 char b[] = "/home/peer/Desktop/deletefolder";
-sleep(2);
 int ret = rename(path,b);
 if(ret==0){
 	printf("Files succesfully moved \n");
 	}	
 	else{
-		perror("Error \n");
+		perror("Error in moving data \n");
 	}
 remove(path);
 }
@@ -84,34 +81,42 @@ int main(){
 
 char newfolder[]="newfolder";
 char deletefolder[]="deletefolder";
+char oldnameNew[]= "/home/peer/Desktop/C/newfolder";
+char oldnameDelete[]= "/home/peer/Desktop/C/deletefolder";
 char path[]="/home/peer/Desktop/newfolder";
-int value = 100;
+int value = 2;
+int status=0;
+pid_t wpid;
 char deletepath[]="/home/peer/Desktop/deletefolder";
-pid_t pid = fork();
-
 
 createfolder(newfolder);
 createfolder(deletefolder);
-movefolder(path);
+movefolder(path,oldnameNew);
+movefolder(deletepath,oldnameDelete);
 
-printf("Dateien verdoppeln?");
+printf("Double files?");
 char str[10];
 char aName[]="yes";
 fgets(str,3,stdin);
 if(strcmp(str,aName)){
-	// fork um Dateien doppelt zu erstellen
-	fork();
-	value=200;
-	createdata(path,value);
-	printf("Fork ID ist %d \n",getpid());
-	exit(0);
-	}
-	else {
-	createdata(path,value);
+	// fork to double the files
+		fork();
+		int value1=value*2;
+		createdata(path,value1);
+		printf("Child process is %d  parent process ist %d \n",getpid(),getppid());
+		}
+		else {
+		createdata(path,value);
+		exit(0);
 }
 
-sleep(2);
+while ((wpid=wait(&status))>0)
+{
+printf("Exit status of %d was %d (%s) \n", (int)wpid, status,(status>0) ? "accept" : "reject");
+}
+
 movedata(path);
+sleep(1);
 deletedata(deletepath);
 
 return(0);
