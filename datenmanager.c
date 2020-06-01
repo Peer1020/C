@@ -43,25 +43,23 @@ int duplicate =2;
 FILE * filePointer= NULL;
 
 printf("Duplicate files?");
-
-
-while ((wpid=wait(&status))>0)
-	{
-	printf("Exit status of %d was %d (%s) \n", (int)wpid, status,(status>0) ? "accept" : "reject");
-	}
-
-
+fgets(str,3,stdin);
 if(strcmp(str,aName))
 {
 	// fork to double the files
-	fork();
+	
+	if(fork()==0){
 	printf("Child process is %d  parent process ist %d \n",getpid(),getppid());
 	int value2 = value*duplicate;
-	else{
-}
+	}
+	else if(fork()>0){
+	wait(NULL);
+	printf("No duplication");
+	printf("Exit status of %d was %d (%s) \n", (int)wpid, status,(status>0) ? "accept" : "reject");
+	}
 }
 
-	//define file, create and write text
+//define file, create and write text
 for(i;i<value;i++)
 {
 	sprintf(fname,"file-%d.txt",i);
@@ -76,8 +74,6 @@ for(i;i<value;i++)
 	fclose(filePointer);	
 }
 		
-
-
 }
 
 void movedata(char *path){
@@ -132,6 +128,7 @@ movefolder(path,oldnameNew);
 movefolder(deletepath,oldnameDelete);
 createdata(path,value);
 movedata(path);
+sleep(5);
 deletedata(deletepath);
 
 return(0);
