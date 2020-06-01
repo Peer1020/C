@@ -5,8 +5,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <pthread.h>
 
-void createfolder(char *filename){
+void *createfolder(void *filename){
 
 struct stat st = {0};
 
@@ -26,25 +29,55 @@ int ret = rename(oldname, path);
 
 void createdata(char *path, int value){
 
+int status=0;
+pid_t wpid;
+char str[10];
+char aName[]="yes";
+fgets(str,3,stdin);
 int ret;
 ret= chdir(path);
 int i =0;
 char fname[value];
-
+int duplicate =2;
 // define pointer for file
 FILE * filePointer= NULL;
-//define file, create and write text
-	for(i;i<value;i++){
-		sprintf(fname,"file-%d.txt",i);
-		filePointer =fopen(fname,"w");
-		fputs("This is a text",filePointer);
-	//check file
-		if(filePointer==NULL){
+
+printf("Duplicate files?");
+
+
+while ((wpid=wait(&status))>0)
+	{
+	printf("Exit status of %d was %d (%s) \n", (int)wpid, status,(status>0) ? "accept" : "reject");
+	}
+
+
+if(strcmp(str,aName))
+{
+	// fork to double the files
+	fork();
+	printf("Child process is %d  parent process ist %d \n",getpid(),getppid());
+	int value2 = value*duplicate;
+	else{
+}
+}
+
+	//define file, create and write text
+for(i;i<value;i++)
+{
+	sprintf(fname,"file-%d.txt",i);
+	filePointer =fopen(fname,"w");
+	fputs("This is a text",filePointer);
+		//check file
+		if(filePointer==NULL)
+		{
 			printf("Error in Creating a file \n");
 			exit(EXIT_FAILURE);
-			}
-	fclose(filePointer);
-	}
+		}
+	fclose(filePointer);	
+}
+		
+
+
 }
 
 void movedata(char *path){
@@ -84,39 +117,21 @@ char deletefolder[]="deletefolder";
 char oldnameNew[]= "/home/peer/Desktop/C/newfolder";
 char oldnameDelete[]= "/home/peer/Desktop/C/deletefolder";
 char path[]="/home/peer/Desktop/newfolder";
-int value = 2;
-int status=0;
-pid_t wpid;
+int value = 1000;
 char deletepath[]="/home/peer/Desktop/deletefolder";
+pthread_t thread_id;
 
-createfolder(newfolder);
-createfolder(deletefolder);
+//createfolder as threads
+pthread_create(&thread_id,NULL,createfolder,newfolder);
+pthread_join(thread_id,NULL);
+pthread_create(&thread_id,NULL,createfolder,deletefolder);
+pthread_join(thread_id,NULL);
+printf("Thread ID is %lu \n", (unsigned long) thread_id);
+
 movefolder(path,oldnameNew);
 movefolder(deletepath,oldnameDelete);
-
-printf("Double files?");
-char str[10];
-char aName[]="yes";
-fgets(str,3,stdin);
-if(strcmp(str,aName)){
-	// fork to double the files
-		fork();
-		int value1=value*2;
-		createdata(path,value1);
-		printf("Child process is %d  parent process ist %d \n",getpid(),getppid());
-		}
-		else {
-		createdata(path,value);
-		exit(0);
-}
-
-while ((wpid=wait(&status))>0)
-{
-printf("Exit status of %d was %d (%s) \n", (int)wpid, status,(status>0) ? "accept" : "reject");
-}
-
+createdata(path,value);
 movedata(path);
-sleep(1);
 deletedata(deletepath);
 
 return(0);
