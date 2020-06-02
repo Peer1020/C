@@ -29,7 +29,7 @@ int ret = rename(oldname, path);
 
 void createdata(char *path, int value){
 
-int status=0;
+int status,k;
 pid_t wpid;
 char str[10];
 char aName[]="yes";
@@ -47,17 +47,20 @@ fgets(str,3,stdin);
 if(strcmp(str,aName))
 {
 	// fork to double the files
-	
-	if(fork()==0){
+	k=fork();
+	if(k == 0){
 	printf("Child process is %d  parent process ist %d \n",getpid(),getppid());
 	int value2 = value*duplicate;
+	exit(0);
 	}
-	else if(fork()>0){
-	wait(NULL);
-	printf("No duplication");
+	else {
+	wpid=wait(&status);
 	printf("Exit status of %d was %d (%s) \n", (int)wpid, status,(status>0) ? "accept" : "reject");
 	}
 }
+else{printf("No duplication \n");
+}
+
 
 //define file, create and write text
 for(i;i<value;i++)
@@ -128,7 +131,6 @@ movefolder(path,oldnameNew);
 movefolder(deletepath,oldnameDelete);
 createdata(path,value);
 movedata(path);
-sleep(5);
 deletedata(deletepath);
 
 return(0);
