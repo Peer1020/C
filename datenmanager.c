@@ -106,9 +106,6 @@ if(strcmp(str1,aName)){
 	}
 }
 
-
-
-
 int main(){
 
 char newfolder[]="newfolder";
